@@ -28,6 +28,8 @@ The application and native runtime remain owned by `lapismd/lapis-notes`.
    Node checks must pass before merge. Releases or cask hashes are never
    replaced to conceal a failed candidate.
 6. Candidate installation accepts an explicit local archive for CI only.
+   Verified bytes are staged under their canonical versioned filename and
+   candidate URLs retain version interpolation for strict Homebrew audit.
    Production output must use canonical upstream GitHub Release URLs. No
    installable cask is advertised before a complete verified upstream release
    supplies actual checksums.

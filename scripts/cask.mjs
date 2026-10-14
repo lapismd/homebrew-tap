@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
+import { basename } from "node:path";
 
 const platforms = new Map([
   ["aarch64-apple-darwin", ["macos", "arm64"]],
@@ -61,6 +62,18 @@ export function validateManifest(manifest, { candidate = false } = {}) {
 
 export function renderCask(manifest, { candidateArchive } = {}) {
   validateManifest(manifest, { candidate: Boolean(candidateArchive) });
+  let candidateUrl;
+  if (candidateArchive) {
+    const artifact = manifest.artifacts[0];
+    if (basename(candidateArchive) !== artifact.file)
+      throw new Error(
+        "Candidate archive must use its canonical versioned filename",
+      );
+    const localUrl = pathToFileURL(candidateArchive).href;
+    candidateUrl =
+      localUrl.slice(0, localUrl.lastIndexOf("/") + 1) +
+      artifact.file.replace(manifest.version, "#{version}");
+  }
   const token = candidateArchive ? "lapis-notes-candidate" : "lapis-notes";
   const lines = [
     "# frozen_string_literal: true",
@@ -91,7 +104,7 @@ export function renderCask(manifest, { candidateArchive } = {}) {
     if (!manifest.artifacts.some((item) => item.platform === platform))
       continue;
     const url = candidateArchive
-      ? pathToFileURL(candidateArchive).href
+      ? candidateUrl
       : `https://github.com/lapismd/lapis-notes/releases/download/desktop-v#{version}/Lapis-Notes-#{version}-${platform}-#{arch}.${platform === "macos" ? "zip" : "tar.gz"}`;
     platformHeaders.set(platform, [
       `  on_${platform} do`,
