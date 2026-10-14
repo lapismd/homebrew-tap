@@ -62,9 +62,13 @@ test("local archive installation is explicit and limited to one candidate target
   manifest.artifacts = [manifest.artifacts[0]];
   assert.throws(() => renderCask(manifest), /four/);
   const cask = renderCask(manifest, {
-    candidateArchive: "/tmp/Lapis Notes.zip",
+    candidateArchive: `/tmp/with spaces/${manifest.artifacts[0].file}`,
   });
   assert.match(cask, /cask "lapis-notes-candidate"/);
-  assert.match(cask, /file:\/\/\/tmp\/Lapis%20Notes.zip/);
+  assert.match(
+    cask,
+    /file:\/\/\/tmp\/with%20spaces\/Lapis-Notes-#\{version\}-macos-arm64.zip/,
+  );
+  assert.ok(cask.includes(manifest.artifacts[0].sha256));
   assert.doesNotMatch(cask, /on_linux/);
 });

@@ -7,6 +7,7 @@ import {
   mkdtemp,
   rm,
   access,
+  copyFile,
 } from "node:fs/promises";
 import { spawnSync, execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -119,6 +120,9 @@ try {
     artifact.sha256,
     "Installed candidate checksum must match upstream manifest",
   );
+  const stagedArchive = path.join(root, artifact.file);
+  if (archive !== stagedArchive) await copyFile(archive, stagedArchive);
+  archive = stagedArchive;
   if (platform === "macos")
     run("/usr/bin/xattr", [
       "-w",
