@@ -4,9 +4,8 @@ This public tap installs Lapis Notes on Apple Silicon macOS 15+, and
 ARM64 and x86-64 Linux. Intel macOS is deferred because the pinned Turso
 database package has no published Darwin x64 native addon.
 
-The repository is bootstrapped. The first complete, verified desktop release
-will populate `Casks/lapis-notes.rb` through a reviewed update PR. The installation
-command becomes available when that PR passes native checks and is merged:
+[Lapis Notes 2026.31.5](https://github.com/lapismd/lapis-notes/releases/tag/desktop-v2026.31.5)
+is available from this tap. Install it with:
 
 ```sh
 brew tap lapismd/tap
