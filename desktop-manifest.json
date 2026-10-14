@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "repository": "lapismd/lapis-notes",
+  "version": "2026.31.5",
+  "tag": "desktop-v2026.31.5",
+  "sourceCommit": "9fed4f1577a6beb27168d0b83b9ea42408d4f1b1",
+  "artifacts": [
+    {
+      "target": "aarch64-apple-darwin",
+      "platform": "macos",
+      "architecture": "arm64",
+      "file": "Lapis-Notes-2026.31.5-macos-arm64.zip",
+      "url": "https://github.com/lapismd/lapis-notes/releases/download/desktop-v2026.31.5/Lapis-Notes-2026.31.5-macos-arm64.zip",
+      "size": 231357752,
+      "sha256": "b1510bdfe5550ba70f3e939e5c8940b1cfd6459f3dbe76ed8cfa26c98ccca571"
+    },
+    {
+      "target": "aarch64-unknown-linux-gnu",
+      "platform": "linux",
+      "architecture": "arm64",
+      "file": "Lapis-Notes-2026.31.5-linux-arm64.tar.gz",
+      "url": "https://github.com/lapismd/lapis-notes/releases/download/desktop-v2026.31.5/Lapis-Notes-2026.31.5-linux-arm64.tar.gz",
+      "size": 256012160,
+      "sha256": "7ffc34c9feff1bfccb0795f9c16b5fea3d77c92edbe831be8e11b59967d1f166"
+    },
+    {
+      "target": "x86_64-unknown-linux-gnu",
+      "platform": "linux",
+      "architecture": "x64",
+      "file": "Lapis-Notes-2026.31.5-linux-x64.tar.gz",
+      "url": "https://github.com/lapismd/lapis-notes/releases/download/desktop-v2026.31.5/Lapis-Notes-2026.31.5-linux-x64.tar.gz",
+      "size": 599267398,
+      "sha256": "fd8bcf1cb88e2c98a5437c0d471545c18a1a6048eb3e1d6313a48ce405092c43"
+    }
+  ]
+}
