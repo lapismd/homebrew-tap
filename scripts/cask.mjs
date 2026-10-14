@@ -143,7 +143,7 @@ export function renderCask(manifest, { candidateArchive } = {}) {
       '                "Exec=lapis-notes %u", \'Exec="{{HOMEBREW_PREFIX}}/bin/lapis-notes" %u\'',
       '      inreplace "Lapis-Notes-{{version}}-linux-{{arch}}/lapis-notes.desktop",',
       '                "Icon=lapis-notes", "Icon={{staged_path}}/Lapis-Notes-{{version}}-linux-{{arch}}/lapis-notes.png"',
-      '      run "Lapis-Notes-{{version}}-linux-{{arch}}/lapis-notes", args: ["--check-runtime"]',
+      '      run "{{staged_path}}/Lapis-Notes-{{version}}-linux-{{arch}}/lapis-notes", args: ["--check-runtime"]',
       "    end",
       "  end",
     );
