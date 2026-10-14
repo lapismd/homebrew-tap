@@ -1,0 +1,4 @@
+node_modules/
+.candidates/
+test-results/
+.DS_Store

@@ -1,0 +1,81 @@
+name: Homebrew tap CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: homebrew-tap-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  checks:
+    name: Tap checks
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24.15.0"
+      - uses: Homebrew/actions/setup-homebrew@f9676f1ffe2e1a720f81b2c54c51cfb99915ec14
+      - run: npm test
+      - run: npm run check
+        env:
+          LAPIS_TAP_BREW_CHECK: "1"
+  native:
+    name: Native installation (${{ matrix.label }})
+    needs: checks
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { label: macos-arm64, os: macos-15 }
+          - { label: macos-x64, os: macos-15-intel }
+          - { label: linux-arm64, os: ubuntu-24.04-arm }
+          - { label: linux-x64, os: ubuntu-24.04 }
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+      - id: release
+        shell: bash
+        run: |
+          if test -f desktop-manifest.json; then
+            node --input-type=module -e 'import {readFileSync,appendFileSync} from "node:fs"; import {validateManifest} from "./scripts/cask.mjs"; const manifest=validateManifest(JSON.parse(readFileSync("desktop-manifest.json","utf8"))); appendFileSync(process.env.GITHUB_OUTPUT,"available=true\ncommit="+manifest.sourceCommit+"\n");'
+          else
+            echo 'Bootstrap repository: waiting for the first verified desktop release.'
+            echo 'available=false' >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/setup-node@v7
+        if: steps.release.outputs.available == 'true'
+        with:
+          node-version: "24.15.0"
+      - uses: Homebrew/actions/setup-homebrew@f9676f1ffe2e1a720f81b2c54c51cfb99915ec14
+        if: steps.release.outputs.available == 'true'
+      - name: Install Linux GUI acceptance dependencies
+        if: runner.os == 'Linux' && steps.release.outputs.available == 'true'
+        run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-0 libgtk-3-0t64 libayatana-appindicator3-1 xvfb dbus-x11 desktop-file-utils
+      - uses: actions/checkout@v7
+        if: steps.release.outputs.available == 'true'
+        with:
+          repository: lapismd/lapis-notes
+          ref: ${{ steps.release.outputs.commit }}
+          path: .candidates/source
+      - uses: actions/checkout@v7
+        if: github.event_name == 'pull_request' && steps.release.outputs.available == 'true'
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: .candidates/previous
+      - name: Native Homebrew installation on macOS
+        if: runner.os == 'macOS' && steps.release.outputs.available == 'true'
+        run: node scripts/test-install.mjs --audit --manifest desktop-manifest.json --source .candidates/source --previous-manifest .candidates/previous/desktop-manifest.json
+      - name: Native Homebrew installation on Linux
+        if: runner.os == 'Linux' && steps.release.outputs.available == 'true'
+        run: xvfb-run -a dbus-run-session -- node scripts/test-install.mjs --audit --manifest desktop-manifest.json --source .candidates/source --previous-manifest .candidates/previous/desktop-manifest.json
+      - uses: actions/upload-artifact@v7
+        if: always() && steps.release.outputs.available == 'true'
+        with:
+          name: homebrew-installation-${{ matrix.label }}
+          path: test-results/
+          if-no-files-found: warn
