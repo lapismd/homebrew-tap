@@ -20,6 +20,8 @@ The application and native runtime remain owned by `lapismd/lapis-notes`.
    It advertises existing Lapis URL schemes without replacing user defaults.
    Ubuntu 24.04 is the initial qualified distribution on both architectures;
    system WebKitGTK 4.1, GTK 3 and Ayatana AppIndicator are prerequisites.
+   Preflight commands resolve the staged bundle absolutely, independently of
+   Homebrew's process working directory.
 4. Upgrade, reinstall and uninstall manage only installed application artifacts.
    Vaults, profiles and user data are preserved. The tap does not provide the
    separately installed AI controller.

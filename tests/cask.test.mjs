@@ -16,6 +16,10 @@ test("generates one cross-platform cask with exact upstream checksums", () => {
   assert.match(cask, /postflight_steps do/);
   assert.match(cask, /com.apple.quarantine/);
   assert.match(cask, /Exec=.*HOMEBREW_PREFIX.*lapis-notes/);
+  assert.match(
+    cask,
+    /run "\{\{staged_path\}\}\/Lapis-Notes-\{\{version\}\}-linux-\{\{arch\}\}\/lapis-notes"/,
+  );
   assert.doesNotMatch(
     cask,
     /no_check|no-quarantine|master-disable|chmod.*777|zap/,
