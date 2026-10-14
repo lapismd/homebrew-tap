@@ -65,7 +65,7 @@ if (existingPRs.length) {
       title: `Update Lapis Notes to ${manifest.version}`,
       head: branch,
       base: "main",
-      body: `Install Lapis Notes ${manifest.version} from the four verified upstream desktop archives. macOS bundles remain ad-hoc signed and are prepared through the app-scoped quarantine hook.\n\nSource: https://github.com/lapismd/lapis-notes/tree/${manifest.sourceCommit}\nRelease: https://github.com/lapismd/lapis-notes/releases/tag/${manifest.tag}\n\nAll four native installation checks must pass before merge.`,
+      body: `Install Lapis Notes ${manifest.version} from the three verified upstream desktop archives. macOS bundles remain ad-hoc signed and are prepared through the app-scoped quarantine hook.\n\nSource: https://github.com/lapismd/lapis-notes/tree/${manifest.sourceCommit}\nRelease: https://github.com/lapismd/lapis-notes/releases/tag/${manifest.tag}\n\nAll three native installation checks must pass before merge.`,
     },
   });
   console.log(`Created ${pull.html_url}`);

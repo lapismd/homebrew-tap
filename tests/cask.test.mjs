@@ -11,6 +11,7 @@ test("generates one cross-platform cask with exact upstream checksums", () => {
   for (const artifact of manifest.artifacts)
     assert.ok(cask.includes(artifact.sha256));
   assert.match(cask, /on_macos do/);
+  assert.match(cask, /on_macos do[\s\S]*depends_on arch: :arm64/);
   assert.match(cask, /on_linux do/);
   assert.match(cask, /target: "Lapis Notes.app"/);
   assert.match(cask, /postflight_steps do/);
@@ -29,7 +30,7 @@ test("generates one cross-platform cask with exact upstream checksums", () => {
 test("rejects incomplete or duplicate architecture manifests", () => {
   const manifest = fixture();
   manifest.artifacts.pop();
-  assert.throws(() => validateManifest(manifest), /four/);
+  assert.throws(() => validateManifest(manifest), /three/);
   manifest.artifacts.push(manifest.artifacts[0]);
   assert.throws(() => validateManifest(manifest), /duplicate/);
 });
@@ -64,7 +65,7 @@ test("rejects untrusted downloads, traversal, mismatched tags and fake checksums
 test("local archive installation is explicit and limited to one candidate target", () => {
   const manifest = fixture();
   manifest.artifacts = [manifest.artifacts[0]];
-  assert.throws(() => renderCask(manifest), /four/);
+  assert.throws(() => renderCask(manifest), /three/);
   const cask = renderCask(manifest, {
     candidateArchive: `/tmp/with spaces/${manifest.artifacts[0].file}`,
   });
@@ -75,4 +76,15 @@ test("local archive installation is explicit and limited to one candidate target
   );
   assert.ok(cask.includes(manifest.artifacts[0].sha256));
   assert.doesNotMatch(cask, /on_linux/);
+});
+
+test("rejects deferred Intel macOS in complete and candidate manifests", () => {
+  const manifest = fixture();
+  manifest.artifacts[0].target = "x86_64-apple-darwin";
+  assert.throws(() => validateManifest(manifest), /Unsupported/);
+  manifest.artifacts = [manifest.artifacts[0]];
+  assert.throws(
+    () => validateManifest(manifest, { candidate: true }),
+    /Unsupported/,
+  );
 });

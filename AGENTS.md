@@ -10,6 +10,6 @@ in the source repository; Lapis Notes is owned by `lapismd/lapis-notes`.
   checksum, use `sha256 :no_check`, or publish checkout-specific download URLs.
 - Keep unsigned macOS preparation scoped to the installed Lapis Notes bundle.
 - Preserve vaults and application data during install, upgrade and uninstall.
-- Run `npm test` and `npm run check`; cask updates additionally require the four
+- Run `npm test` and `npm run check`; cask updates additionally require the three
   native Homebrew installation jobs. Record qualification honestly.
 - Commit each verified slice with a descriptive message and validation evidence.

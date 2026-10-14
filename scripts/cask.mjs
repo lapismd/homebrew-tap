@@ -4,7 +4,6 @@ import { basename } from "node:path";
 
 const platforms = new Map([
   ["aarch64-apple-darwin", ["macos", "arm64"]],
-  ["x86_64-apple-darwin", ["macos", "x64"]],
   ["aarch64-unknown-linux-gnu", ["linux", "arm64"]],
   ["x86_64-unknown-linux-gnu", ["linux", "x64"]],
 ]);
@@ -28,10 +27,10 @@ export function validateManifest(manifest, { candidate = false } = {}) {
     throw new Error("Exact desktop source commit is required");
   if (
     !Array.isArray(manifest.artifacts) ||
-    manifest.artifacts.length !== (candidate ? 1 : 4)
+    manifest.artifacts.length !== (candidate ? 1 : platforms.size)
   )
     throw new Error(
-      "A production manifest requires all four targets; a candidate requires one",
+      "A production manifest requires all three targets; a candidate requires one",
     );
   const seen = new Set();
   for (const artifact of manifest.artifacts) {
@@ -85,7 +84,6 @@ export function renderCask(manifest, { candidateArchive } = {}) {
   ];
   const keys = {
     "aarch64-apple-darwin": "arm",
-    "x86_64-apple-darwin": "intel",
     "aarch64-unknown-linux-gnu": "arm64_linux",
     "x86_64-unknown-linux-gnu": "x86_64_linux",
   };
@@ -115,6 +113,7 @@ export function renderCask(manifest, { candidateArchive } = {}) {
   if (manifest.artifacts.some((item) => item.platform === "macos")) {
     lines.push(
       ...platformHeaders.get("macos"),
+      "    depends_on arch: :arm64",
       "    depends_on macos: :sequoia",
       "",
       '    app "Lapis-Notes-#{version}-macos-#{arch}.app", target: "Lapis Notes.app"',

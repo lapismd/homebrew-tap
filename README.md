@@ -1,7 +1,8 @@
 # LapisMD Homebrew tap
 
-This public tap installs Lapis Notes on Apple Silicon and Intel macOS, and
-ARM64 and x86-64 Linux.
+This public tap installs Lapis Notes on Apple Silicon macOS 15+, and
+ARM64 and x86-64 Linux. Intel macOS is deferred because the pinned Turso
+database package has no published Darwin x64 native addon.
 
 The repository is bootstrapped. The first complete, verified desktop release
 will populate `Casks/lapis-notes.rb` through a reviewed update PR. The installation
@@ -43,15 +44,15 @@ URL delivery remains a Deno limitation ([denoland/deno#35465](https://github.com
 
 ## Maintenance
 
-A `desktop-v<version>` source tag builds and tests all four native candidates.
+A `desktop-v<version>` source tag builds and tests all three native candidates.
 The source release workflow publishes immutable archives, `SHA256SUMS` and
 `desktop-manifest.json`, then opens a tap update PR. A GitHub App restricted to
 this repository needs Contents and Pull requests write permissions. Configure
 `HOMEBREW_TAP_APP_ID` as a repository variable and
 `HOMEBREW_TAP_APP_PRIVATE_KEY` as a secret in `lapismd/lapis-notes`.
 
-All five checks gate update PRs: **Tap checks**, plus **Native installation**
-for macOS ARM64/x64 and Linux ARM64/x64. Neither upstream publication nor tap
+All four checks gate update PRs: **Tap checks**, plus **Native installation**
+for macOS ARM64 and Linux ARM64/x64. Neither upstream publication nor tap
 updates install or bundle the AI controller.
 
 To recover a failed tap-update job after an already successful release, use

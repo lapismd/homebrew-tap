@@ -31,7 +31,6 @@ jobs:
       matrix:
         include:
           - { label: macos-arm64, os: macos-15 }
-          - { label: macos-x64, os: macos-15-intel }
           - { label: linux-arm64, os: ubuntu-24.04-arm }
           - { label: linux-x64, os: ubuntu-24.04 }
     runs-on: ${{ matrix.os }}
