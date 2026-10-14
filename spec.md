@@ -31,3 +31,6 @@ The application and native runtime remain owned by `lapismd/lapis-notes`.
    Production output must use canonical upstream GitHub Release URLs. No
    installable cask is advertised before a complete verified upstream release
    supplies actual checksums.
+7. Installation guidance includes Homebrew 7's explicit cask trust command.
+   Trust is limited to `lapismd/tap/lapis-notes`; installation does not disable
+   Homebrew's trust protections or require whole-tap trust.

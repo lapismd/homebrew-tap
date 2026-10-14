@@ -8,12 +8,14 @@ will populate `Casks/lapis-notes.rb` through a reviewed update PR. The installat
 command becomes available when that PR passes native checks and is merged:
 
 ```sh
+brew tap lapismd/tap
+brew trust --cask lapismd/tap/lapis-notes
 brew install --cask lapismd/tap/lapis-notes
 brew upgrade --cask lapismd/tap/lapis-notes
 brew uninstall --cask lapismd/tap/lapis-notes
 ```
 
-Use current Homebrew 7. A fully qualified installation trusts only this cask.
+Use current Homebrew 7. The trust command grants Homebrew access to this cask.
 On macOS the app appears as **Lapis Notes** in Homebrew's application directory.
 A custom destination can be selected with `--appdir="$HOME/Applications"`.
 
