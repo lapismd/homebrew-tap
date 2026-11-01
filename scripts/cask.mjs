@@ -1,3 +1,4 @@
+import { validatePreview, renderPreview } from "./preview.mjs";
 import { readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 import { basename } from "node:path";
@@ -13,6 +14,7 @@ const macPreparation = readFileSync(
 ).trimEnd();
 
 export function validateManifest(manifest, { candidate = false } = {}) {
+  if (manifest?.schemaVersion === 2) return validatePreview(manifest);
   if (
     manifest.schemaVersion !== 1 ||
     manifest.repository !== "lapismd/lapis-notes"
@@ -60,6 +62,8 @@ export function validateManifest(manifest, { candidate = false } = {}) {
 }
 
 export function renderCask(manifest, { candidateArchive } = {}) {
+  if (manifest?.schemaVersion === 2)
+    return renderPreview(manifest, { candidateArchive });
   validateManifest(manifest, { candidate: Boolean(candidateArchive) });
   let candidateUrl;
   if (candidateArchive) {

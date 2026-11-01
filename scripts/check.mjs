@@ -10,6 +10,8 @@ import { spawnSync } from "node:child_process";
 import os from "node:os";
 import path from "node:path";
 import { renderCask } from "./cask.mjs";
+import { channelPaths } from "./channels.mjs";
+import { previewFixture } from "../tests/preview-fixture.mjs";
 import { fixture } from "../tests/fixtures.mjs";
 
 function run(command, args) {
@@ -26,28 +28,37 @@ run("/bin/sh", ["-n", "scripts/prepare-macos.sh"]);
 const root = await mkdtemp(path.join(os.tmpdir(), "lapis-cask-check-"));
 try {
   await mkdir(path.join(root, "Casks"));
-  const generated = path.join(root, "Casks/lapis-notes.rb");
-  await writeFile(generated, renderCask(fixture()));
-  run("ruby", ["-c", generated]);
-  if (process.env.LAPIS_TAP_BREW_CHECK === "1")
-    run("brew", ["style", generated]);
+  for (const manifest of [fixture(), previewFixture()]) {
+    const file =
+      manifest.schemaVersion === 2
+        ? "lapis-notes@preview.rb"
+        : "lapis-notes.rb";
+    const generated = path.join(root, "Casks", file);
+    await writeFile(generated, renderCask(manifest));
+    run("ruby", ["-c", generated]);
+    if (process.env.LAPIS_TAP_BREW_CHECK === "1")
+      run("brew", ["style", generated]);
+  }
 } finally {
   await rm(root, { recursive: true, force: true });
 }
 const casks = (await readdir("Casks")).filter((file) => file.endsWith(".rb"));
-if (casks.length) {
-  const manifest = JSON.parse(await readFile("desktop-manifest.json", "utf8"));
-  if (
-    casks.length !== 1 ||
-    casks[0] !== "lapis-notes.rb" ||
-    (await readFile("Casks/lapis-notes.rb", "utf8")) !== renderCask(manifest)
-  )
-    throw new Error(
+const expected = [];
+for (const channel of ["stable", "preview"]) {
+  const paths = channelPaths(channel);
+  let manifest;
+  try {
+    manifest = JSON.parse(await readFile(paths.manifest, "utf8"));
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+  }
+  if (!manifest) continue;
+  expected.push(path.basename(paths.cask));
+  if ((await readFile(paths.cask, "utf8")) !== renderCask(manifest))
+    throw Error(
       "Production cask must match its upstream release manifest exactly",
     );
-  run("ruby", ["-c", "Casks/lapis-notes.rb"]);
-} else {
-  console.log(
-    "Tap bootstrap: first verified desktop release has not populated the production cask yet.",
-  );
+  run("ruby", ["-c", paths.cask]);
 }
+if (JSON.stringify(casks.sort()) !== JSON.stringify(expected.sort()))
+  throw Error("Unexpected cask or missing release manifest");
