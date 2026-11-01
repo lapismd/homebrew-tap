@@ -41,14 +41,17 @@ Upgrades and uninstall preserve vaults and application data. AI features need
 the separately installed `lapis-ai-controller`. macOS OS-level custom-scheme
 URL delivery remains a Deno limitation ([denoland/deno#35465](https://github.com/denoland/deno/issues/35465)); source-owned executable argument handoff is tested.
 
-## Maintenance
+## Stable archive maintenance
 
-A `desktop-v<version>` source tag builds and tests all three native candidates.
-The source release workflow publishes immutable archives, `SHA256SUMS` and
-`desktop-manifest.json`, then opens a tap update PR. A GitHub App restricted to
-this repository needs Contents and Pull requests write permissions. Configure
-`HOMEBREW_TAP_APP_ID` as a repository variable and
-`HOMEBREW_TAP_APP_PRIVATE_KEY` as a secret in `lapismd/lapis-notes`.
+The stable cask retains the existing published Deno archives from
+`lapismd/lapis-notes`. New Desktop releases use the separate Tauri preview
+workflow below. The stable updater remains available to verify or recover its
+published archive set; it does not switch stable users to Tauri.
+
+Active preview automation uses a GitHub App restricted to this tap with Contents
+and Pull requests write permissions. Configure `HOMEBREW_TAP_APP_ID` and
+`HOMEBREW_TAP_APP_PRIVATE_KEY` in `lapismd/lapis-desktop` as described in the
+[Desktop release guide](https://github.com/lapismd/lapis-desktop/blob/main/docs/desktop-release.md).
 
 All four checks gate update PRs: **Tap checks**, plus **Native installation**
 for macOS ARM64 and Linux ARM64/x64. Neither upstream publication nor tap
@@ -118,3 +121,8 @@ leaves the PR unmerged and its receipts available in Actions.
 Stable Tauri cutover is a later approved operation: preserve the canonical app
 identity, qualify the Deno-to-Tauri upgrade and data compatibility, make stable
 macOS-only, and retire the old desktop CI without deleting old downloads.
+
+After a preview update merges, main CI also installs the actual public
+`lapismd/tap/lapis-notes@preview` cask. Its `preview-public` receipts verify the
+user-facing install/reinstall/uninstall and ordinary-app launch independently
+from the PR's temporary candidate cask.

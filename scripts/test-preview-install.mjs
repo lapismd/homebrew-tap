@@ -29,6 +29,7 @@ if (
   );
 const { values } = parseArgs({
   options: {
+    public: { type: "boolean" },
     manifest: { type: "string" },
     archive: { type: "string" },
     source: { type: "string" },
@@ -38,6 +39,10 @@ const { values } = parseArgs({
 });
 if (!values.manifest || !values.source)
   throw Error("Require --manifest and --source");
+if (values.public && (values.archive || values["previous-manifest"]))
+  throw Error(
+    "Public verification uses the published cask and accepts no candidate overrides",
+  );
 const manifest = validateChannel(
   JSON.parse(await readFile(values.manifest, "utf8")),
   "preview",
@@ -67,8 +72,12 @@ const source = resolve(values.source),
 const appdir = join(root, "Applications with spaces");
 const app = join(appdir, "Lapis Notes Preview.app");
 const vault = join(root, "vault-笔记 café");
-const tap = `lapismd/preview-candidate-${process.pid}`;
-const token = "lapis-notes-preview-candidate",
+const tap = values.public
+  ? "lapismd/tap"
+  : `lapismd/preview-candidate-${process.pid}`;
+const token = values.public
+    ? "lapis-notes@preview"
+    : "lapis-notes-preview-candidate",
   name = `${tap}/${token}`;
 const tapdir = join(
   execFileSync("brew", ["--repository"], { encoding: "utf8" }).trim(),
@@ -126,7 +135,8 @@ async function retained(entries) {
       `Application data changed during Homebrew operation: ${path}`,
     );
 }
-let installed = false;
+let installed = false,
+  ownsPublicTap = false;
 try {
   await Promise.all([
     mkdir(join(tapdir, "Casks"), { recursive: true }),
@@ -138,7 +148,19 @@ try {
   await writeFile(join(profile, ".homebrew-retained"), "profile retained");
   await writeFile(join(vault, "Welcome.md"), "# Retained vault\n");
   const archive = await download(manifest, values.archive);
-  await writeFile(cask, renderCask(manifest, { candidateArchive: archive }));
+  if (values.public) {
+    run("brew", ["tap", "lapismd/tap"]);
+    ownsPublicTap = true;
+    const official = execFileSync("brew", ["--repository", "lapismd/tap"], {
+      encoding: "utf8",
+    }).trim();
+    assert.equal(
+      await readFile(join(official, "Casks/lapis-notes@preview.rb"), "utf8"),
+      renderCask(manifest),
+      "Public tap must contain the exact verified cask",
+    );
+  } else
+    await writeFile(cask, renderCask(manifest, { candidateArchive: archive }));
   run("brew", ["trust", "--cask", name]);
   run("brew", ["style", name]);
   run("brew", ["audit", "--cask", "--strict", name]);
@@ -182,14 +204,17 @@ try {
     JSON.stringify(
       {
         ok: true,
+        cask: name,
+        distribution: values.public ? "public" : "candidate",
         version: manifest.version,
         sourceCommit: manifest.sourceCommit,
         install: "passed",
         reinstall: "passed",
         uninstall: "passed",
         retainedProfileAndVault: "passed",
-        upgrade:
-          previous && previous.version !== manifest.version
+        upgrade: values.public
+          ? "not-run: fresh public installation; see candidate upgrade receipts"
+          : previous && previous.version !== manifest.version
             ? "passed"
             : "not-run: no previous different preview",
         audit: "passed",
@@ -202,6 +227,8 @@ try {
   if (installed)
     spawnSync("brew", ["uninstall", "--cask", name], { env, stdio: "inherit" });
   spawnSync("brew", ["untrust", "--cask", name], { env, stdio: "ignore" });
+  if (ownsPublicTap)
+    spawnSync("brew", ["untap", "lapismd/tap"], { env, stdio: "inherit" });
   await rm(tapdir, { recursive: true, force: true });
   await rm(root, { recursive: true, force: true });
   await rm(profile, { recursive: true, force: true });
