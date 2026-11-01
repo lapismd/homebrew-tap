@@ -26,3 +26,23 @@ export function previewFixture(
     ],
   };
 }
+
+export function linuxPreviewFixture(version) {
+  const manifest = previewFixture(version);
+  for (const [architecture, target] of [
+    ["arm64", "aarch64-unknown-linux-gnu"],
+    ["x64", "x86_64-unknown-linux-gnu"],
+  ]) {
+    const file = `Lapis-Notes-Preview-${manifest.version}-linux-${architecture}.tar.gz`;
+    manifest.artifacts.push({
+      target,
+      platform: "linux",
+      architecture,
+      file,
+      url: `https://github.com/lapismd/lapis-desktop/releases/download/${manifest.tag}/${file}`,
+      size: Buffer.byteLength("preview fixture"),
+      sha256: createHash("sha256").update("preview fixture").digest("hex"),
+    });
+  }
+  return manifest;
+}

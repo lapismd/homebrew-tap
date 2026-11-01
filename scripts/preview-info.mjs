@@ -9,6 +9,7 @@ try {
 } catch (error) {
   if (error.code !== "ENOENT") throw error;
 }
+const platform = process.platform === "darwin" ? "macos" : process.platform;
 if (manifest) {
   const verified = await readPublishedManifest(manifest.tag, fetch, {
     channel: "preview",
@@ -18,7 +19,9 @@ if (manifest) {
 }
 await appendFile(
   process.env.GITHUB_OUTPUT,
-  manifest
+  manifest?.artifacts.some(
+    (a) => a.platform === platform && a.architecture === process.arch,
+  )
     ? `available=true\ncommit=${manifest.sourceCommit}\n`
     : "available=false\n",
 );

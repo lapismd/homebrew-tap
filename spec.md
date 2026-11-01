@@ -42,8 +42,11 @@ The application and native runtime remain owned by `lapismd/lapis-notes`.
 ## Tauri preview distribution
 
 8. Schema v2 is explicitly `runtime: tauri`, `channel: preview`, owned by
-   `lapismd/lapis-desktop`. It requires one macOS ARM64 ZIP containing
-   `Lapis Notes Preview.app`, with version `<CalVer>-rc.<N>` and matching
+   `lapismd/lapis-desktop`. It requires a macOS ARM64 ZIP containing
+   `Lapis Notes Preview.app`, optionally accompanied by the complete Linux
+   ARM64/x64 pair of tar.gz archives. Each Linux archive includes its launcher,
+   Tauri resource directory, release-built AI helpers, icon and desktop entry.
+   A partial Linux pair or duplicate target is invalid. The version is `<CalVer>-rc.<N>` with matching
    `desktop-v<version>` tag. The release must be a public prerelease. Source tag,
    artifact names, canonical URLs, sizes and downloaded hashes must agree.
 9. Preview state is separate in `desktop-preview-manifest.json` and generates
@@ -63,17 +66,21 @@ The application and native runtime remain owned by `lapismd/lapis-notes`.
     updates enable squash auto-merge behind all four existing required checks.
     Identical branches/PRs are reused after failure; unrelated branch changes are
     rejected. A behind branch is updated with its expected head before merging.
-13. The macOS native job also installs, reinstalls and uninstalls preview in an
+13. Each supported platform's native job also installs, reinstalls and uninstalls preview in an
     application directory with spaces, verifies real isolated profile/vault
     retention, launches the installed ordinary bundle through the source-owned
     smoke harness, and qualifies upgrades when a previous different preview
-    exists. These tests run only on ephemeral GitHub macOS ARM64 runners. The
-    bootstrap upgrade gap is reported; other native jobs still qualify stable.
+    exists. These tests run only on ephemeral GitHub runners. Linux qualifies
+    both architectures on Ubuntu 24.04 with system WebKitGTK 4.1, GTK 3 and
+    Ayatana AppIndicator, using an ordinary application and an external X11
+    window/quit probe. It registers only the preview launcher and desktop entry;
+    stable URL schemes remain untouched. The bootstrap upgrade gap is reported.
+    Existing stable installation checks remain required on all three runners.
 
 Stable Tauri cutover is separately approved. It must preserve `Lapis Notes.app`
 and `notes.lapis.desktop`, qualify old-to-new upgrade/data compatibility, advance
-CalVer above the actual installed stable release, explicitly retire Linux from
-the active cask, and retire Deno desktop CI while retaining historical archives.
+CalVer above the actual installed stable release, qualify each retained Linux
+platform, and retire Deno desktop CI while retaining historical archives.
 
 14. A push to main with a verified preview also installs the public
     `lapismd/tap/lapis-notes@preview` cask from the actual official tap. Public
