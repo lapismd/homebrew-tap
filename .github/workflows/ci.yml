@@ -19,6 +19,13 @@ jobs:
         with:
           node-version: "24.15.0"
       - uses: Homebrew/actions/setup-homebrew@f9676f1ffe2e1a720f81b2c54c51cfb99915ec14
+      - uses: actions/checkout@v7
+        if: github.event_name == 'pull_request'
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: .candidates/previous
+      - run: node scripts/check-progression.mjs --base .candidates/previous
+        if: github.event_name == 'pull_request'
       - run: npm test
       - run: npm run check
         env:
@@ -72,6 +79,19 @@ jobs:
       - name: Native Homebrew installation on Linux
         if: runner.os == 'Linux' && steps.release.outputs.available == 'true'
         run: xvfb-run -a dbus-run-session -- node scripts/test-install.mjs --audit --manifest desktop-manifest.json --source .candidates/source --previous-manifest .candidates/previous/desktop-manifest.json
+      - name: Verify published preview
+        id: preview
+        if: runner.os == 'macOS'
+        run: node scripts/preview-info.mjs
+      - uses: actions/checkout@v7
+        if: runner.os == 'macOS' && steps.preview.outputs.available == 'true'
+        with:
+          repository: lapismd/lapis-desktop
+          ref: ${{ steps.preview.outputs.commit }}
+          path: .candidates/preview-source
+      - name: Native Tauri preview Homebrew installation
+        if: runner.os == 'macOS' && steps.preview.outputs.available == 'true'
+        run: node scripts/test-preview-install.mjs --manifest desktop-preview-manifest.json --source .candidates/preview-source --previous-manifest .candidates/previous/desktop-preview-manifest.json
       - uses: actions/upload-artifact@v7
         if: always() && steps.release.outputs.available == 'true'
         with:

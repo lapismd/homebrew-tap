@@ -2,7 +2,8 @@
 
 This repository owns Homebrew definitions and installation integration for
 released LapisMD applications. Application packaging and runtime defects belong
-in the source repository; Lapis Notes is owned by `lapismd/lapis-notes`.
+in the source repository: stable Deno Notes in `lapismd/lapis-notes`, and Tauri
+Notes Preview in `lapismd/lapis-desktop`.
 
 - Use Jujutsu for local version control. Preserve unrelated work.
 - Read `spec.md` before changing distribution contracts.

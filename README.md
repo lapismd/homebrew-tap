@@ -75,3 +75,46 @@ Run `npm test` and `npm run check` for development. Native CI invokes
 reinstall, cold core startup, argument handoff and clean uninstall. macOS
 launches the installed app through LaunchServices with no development runtime
 on its PATH. Evidence is retained as workflow artifacts.
+
+## Tauri preview channel
+
+The tap also supports the separate Tauri Desktop release pipeline. Preview is
+Apple Silicon macOS 15+ only; stable Notes and its Linux packages remain
+available above. A preview cask is generated only after the first verified public
+Desktop prerelease. Until then these commands are not yet installable:
+
+```sh
+brew trust --cask lapismd/tap/lapis-notes@preview
+brew install --cask lapismd/tap/lapis-notes@preview
+brew upgrade --cask lapismd/tap/lapis-notes@preview
+```
+
+Preview installs **Lapis Notes Preview.app**, uses its separate profile, and does
+not register the stable app's URL handlers. It is ad-hoc signed and unnotarized;
+installation prepares only that bundle. Desktop bundles its native AI helpers.
+Uninstall preserves profiles and vaults.
+
+Desktop prepares a tested candidate before its protected publication approval.
+Publication creates a GitHub prerelease, then the restricted Homebrew GitHub App
+opens a two-file update PR and enables auto-merge. The existing Tap checks and
+three Native installation checks remain required. The macOS job also qualifies
+preview install/reinstall/uninstall and real data retention. First-release
+upgrade coverage is explicitly not run until a prior preview exists.
+
+If publication succeeded but tap updating failed, recover without rebuilding:
+
+```sh
+node scripts/update-cask.mjs --channel preview --release desktop-v2026.31.6-rc.1
+npm test
+LAPIS_TAP_BREW_CHECK=1 npm run check
+node scripts/open-update-pr.mjs --channel preview
+```
+
+Set `GH_TOKEN` to the restricted Homebrew App installation token for PR creation.
+The scripts verify release provenance and bytes, reject changed release identity
+or a downgrade, and safely reuse a matching branch/PR. A strict-check failure
+leaves the PR unmerged and its receipts available in Actions.
+
+Stable Tauri cutover is a later approved operation: preserve the canonical app
+identity, qualify the Deno-to-Tauri upgrade and data compatibility, make stable
+macOS-only, and retire the old desktop CI without deleting old downloads.
