@@ -118,3 +118,8 @@ leaves the PR unmerged and its receipts available in Actions.
 Stable Tauri cutover is a later approved operation: preserve the canonical app
 identity, qualify the Deno-to-Tauri upgrade and data compatibility, make stable
 macOS-only, and retire the old desktop CI without deleting old downloads.
+
+After a preview update merges, main CI also installs the actual public
+`lapismd/tap/lapis-notes@preview` cask. Its `preview-public` receipts verify the
+user-facing install/reinstall/uninstall and ordinary-app launch independently
+from the PR's temporary candidate cask.

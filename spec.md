@@ -74,3 +74,10 @@ Stable Tauri cutover is separately approved. It must preserve `Lapis Notes.app`
 and `notes.lapis.desktop`, qualify old-to-new upgrade/data compatibility, advance
 CalVer above the actual installed stable release, explicitly retire Linux from
 the active cask, and retire Deno desktop CI while retaining historical archives.
+
+14. A push to main with a verified preview also installs the public
+    `lapismd/tap/lapis-notes@preview` cask from the actual official tap. Public
+    verification rejects candidate/archive/previous-version overrides and requires
+    the official cask bytes to match the verified manifest. It repeats ordinary
+    launch, reinstall, uninstall and data-retention checks on the ephemeral
+    runner, recording public-cask receipts separately from candidate receipts.

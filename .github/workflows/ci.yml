@@ -92,6 +92,9 @@ jobs:
       - name: Native Tauri preview Homebrew installation
         if: runner.os == 'macOS' && steps.preview.outputs.available == 'true'
         run: node scripts/test-preview-install.mjs --manifest desktop-preview-manifest.json --source .candidates/preview-source --previous-manifest .candidates/previous/desktop-preview-manifest.json
+      - name: Public Tauri preview Homebrew installation
+        if: runner.os == 'macOS' && github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.preview.outputs.available == 'true'
+        run: node scripts/test-preview-install.mjs --public --manifest desktop-preview-manifest.json --source .candidates/preview-source --output test-results/preview-public
       - uses: actions/upload-artifact@v7
         if: always() && steps.release.outputs.available == 'true'
         with:
