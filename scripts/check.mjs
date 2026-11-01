@@ -11,7 +11,10 @@ import os from "node:os";
 import path from "node:path";
 import { renderCask } from "./cask.mjs";
 import { channelPaths } from "./channels.mjs";
-import { previewFixture } from "../tests/preview-fixture.mjs";
+import {
+  previewFixture,
+  linuxPreviewFixture,
+} from "../tests/preview-fixture.mjs";
 import { fixture } from "../tests/fixtures.mjs";
 
 function run(command, args) {
@@ -28,7 +31,7 @@ run("/bin/sh", ["-n", "scripts/prepare-macos.sh"]);
 const root = await mkdtemp(path.join(os.tmpdir(), "lapis-cask-check-"));
 try {
   await mkdir(path.join(root, "Casks"));
-  for (const manifest of [fixture(), previewFixture()]) {
+  for (const manifest of [fixture(), previewFixture(), linuxPreviewFixture()]) {
     const file =
       manifest.schemaVersion === 2
         ? "lapis-notes@preview.rb"

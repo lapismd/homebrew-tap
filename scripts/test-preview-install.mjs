@@ -17,16 +17,13 @@ import { join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { renderCask } from "./cask.mjs";
 import { assertProgression, validateChannel } from "./channels.mjs";
+import {
+  nativePreviewTarget,
+  installationPaths,
+  verifyLinuxInstallation,
+} from "./preview-host.mjs";
 
-if (
-  process.platform !== "darwin" ||
-  process.arch !== "arm64" ||
-  process.env.GITHUB_ACTIONS !== "true" ||
-  !homedir().startsWith("/Users/runner")
-)
-  throw Error(
-    "Preview installation acceptance requires an ephemeral macOS ARM64 GitHub runner",
-  );
+const target = nativePreviewTarget();
 const { values } = parseArgs({
   options: {
     public: { type: "boolean" },
@@ -57,20 +54,9 @@ if (values["previous-manifest"]) {
 }
 assertProgression(previous, manifest, "preview");
 const root = await mkdtemp(join(tmpdir(), "lapis-preview-homebrew-"));
-const profile = join(
-  homedir(),
-  "Library/Application Support/com.lapismd.lapis-desktop.preview",
-);
-try {
-  await access(profile);
-  throw Error("Refusing to reuse an existing preview application profile");
-} catch (error) {
-  if (error.code !== "ENOENT") throw error;
-}
 const source = resolve(values.source),
   output = resolve(values.output);
 const appdir = join(root, "Applications with spaces");
-const app = join(appdir, "Lapis Notes Preview.app");
 const vault = join(root, "vault-笔记 café");
 const tap = values.public
   ? "lapismd/tap"
@@ -85,7 +71,17 @@ const tapdir = join(
   `homebrew-preview-candidate-${process.pid}`,
 );
 const cask = join(tapdir, "Casks", `${token}.rb`);
-const env = { ...process.env, HOMEBREW_NO_AUTO_UPDATE: "1" };
+const paths = installationPaths(root, token, manifest.version, target);
+const { app, profile, env } = paths;
+const artifact = manifest.artifacts.find((a) => a.target === target.target);
+assert.ok(artifact, "Preview manifest must support this native platform");
+try {
+  await access(profile);
+  throw Error("Refusing to reuse an existing preview application profile");
+} catch (error) {
+  if (error.code !== "ENOENT") throw error;
+}
+
 function run(command, args) {
   const result = spawnSync(command, args, {
     env,
@@ -97,8 +93,9 @@ function run(command, args) {
     throw result.error ?? Error(`${command} failed (${result.status})`);
 }
 async function download(release, local) {
-  const item = release.artifacts[0],
-    destination = join(root, item.file);
+  const item = release.artifacts.find((a) => a.target === target.target);
+  assert.ok(item, "Previous preview must support this native platform");
+  const destination = join(root, item.file);
   if (local) await copyFile(resolve(local), destination);
   else {
     const response = await fetch(item.url);
@@ -109,12 +106,13 @@ async function download(release, local) {
   const bytes = await readFile(destination);
   assert.equal(bytes.length, item.size);
   assert.equal(createHash("sha256").update(bytes).digest("hex"), item.sha256);
-  run("/usr/bin/xattr", [
-    "-w",
-    "com.apple.quarantine",
-    "0081;00000000;LapisHomebrewTest;",
-    destination,
-  ]);
+  if (target.platform === "macos")
+    run("/usr/bin/xattr", [
+      "-w",
+      "com.apple.quarantine",
+      "0081;00000000;LapisHomebrewTest;",
+      destination,
+    ]);
   return destination;
 }
 async function snapshot(directory) {
@@ -144,6 +142,7 @@ try {
     mkdir(profile, { recursive: true }),
     mkdir(vault),
     mkdir(output, { recursive: true }),
+    mkdir(join(paths.dataHome, "applications"), { recursive: true }),
   ]);
   await writeFile(join(profile, ".homebrew-retained"), "profile retained");
   await writeFile(join(vault, "Welcome.md"), "# Retained vault\n");
@@ -164,9 +163,14 @@ try {
   run("brew", ["trust", "--cask", name]);
   run("brew", ["style", name]);
   run("brew", ["audit", "--cask", "--strict", name]);
-  const installArgs = ["--cask", `--appdir=${appdir}`, name];
+  const installArgs = [
+    "--cask",
+    ...(target.platform === "macos" ? [`--appdir=${appdir}`] : []),
+    name,
+  ];
+  const prior = previous?.artifacts.find((a) => a.target === target.target);
   let before = [...(await snapshot(profile)), ...(await snapshot(vault))];
-  if (previous && previous.version !== manifest.version) {
+  if (prior && previous.version !== manifest.version) {
     const old = await download(previous);
     await writeFile(cask, renderCask(previous, { candidateArchive: old }));
     installed = true;
@@ -184,8 +188,14 @@ try {
       run("brew", ["reinstall", ...installArgs]);
       await retained(before);
     }
+    if (target.platform === "linux") await verifyLinuxInstallation(paths, run);
     run(process.execPath, [
-      join(source, "scripts/release/smoke-installed.mjs"),
+      join(
+        source,
+        target.platform === "macos"
+          ? "scripts/release/smoke-installed.mjs"
+          : "scripts/release/smoke-linux.mjs",
+      ),
       "--app",
       app,
       "--manifest",
@@ -199,6 +209,10 @@ try {
   installed = false;
   await retained(before);
   await assert.rejects(access(app));
+  if (target.platform === "linux") {
+    await assert.rejects(access(paths.launcher));
+    await assert.rejects(access(paths.desktop));
+  }
   await writeFile(
     join(output, "homebrew.json"),
     JSON.stringify(
@@ -208,15 +222,19 @@ try {
         distribution: values.public ? "public" : "candidate",
         version: manifest.version,
         sourceCommit: manifest.sourceCommit,
+        target: artifact.target,
+        artifactSha256: artifact.sha256,
         install: "passed",
         reinstall: "passed",
         uninstall: "passed",
         retainedProfileAndVault: "passed",
         upgrade: values.public
           ? "not-run: fresh public installation; see candidate upgrade receipts"
-          : previous && previous.version !== manifest.version
+          : prior && previous.version !== manifest.version
             ? "passed"
-            : "not-run: no previous different preview",
+            : previous && !prior
+              ? "not-run: no previous preview for this platform"
+              : "not-run: no previous different preview",
         audit: "passed",
       },
       null,

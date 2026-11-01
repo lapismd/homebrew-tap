@@ -54,8 +54,7 @@ and Pull requests write permissions. Configure `HOMEBREW_TAP_APP_ID` and
 [Desktop release guide](https://github.com/lapismd/lapis-desktop/blob/main/docs/desktop-release.md).
 
 All four checks gate update PRs: **Tap checks**, plus **Native installation**
-for macOS ARM64 and Linux ARM64/x64. Neither upstream publication nor tap
-updates install or bundle the AI controller.
+for macOS ARM64 and Linux ARM64/x64. The stable Deno app still needs its separate AI controller; Tauri preview bundles its native helpers.
 
 To recover a failed tap-update job after an already successful release, use
 an appropriately scoped GitHub App token and run:
@@ -82,7 +81,7 @@ on its PATH. Evidence is retained as workflow artifacts.
 ## Tauri preview channel
 
 The tap also supports the separate Tauri Desktop release pipeline. Preview is
-Apple Silicon macOS 15+ only; stable Notes and its Linux packages remain
+Apple Silicon macOS 15+ and Ubuntu 24.04 Linux ARM64/x64; stable Notes remains
 available above. A preview cask is generated only after the first verified public
 Desktop prerelease. Until then these commands are not yet installable:
 
@@ -97,10 +96,20 @@ not register the stable app's URL handlers. It is ad-hoc signed and unnotarized;
 installation prepares only that bundle. Desktop bundles its native AI helpers.
 Uninstall preserves profiles and vaults.
 
+Linux preview uses the same Ubuntu system libraries listed above and launches
+with `lapis-notes-preview`. Its complete archive retains the Tauri resource tree
+and bundled helpers in Caskroom; Homebrew links the distinct preview launcher and
+installs `com.lapismd.lapis-desktop.preview.desktop`. XDG data-directory settings
+are supported, including paths with spaces. Preview registers no stable URL
+schemes. Native Linux receipts qualify installation, integrity, architecture,
+visible X11 window and graceful quit with no Node/Deno on the app PATH; full Linux
+native feature parity remains unqualified. Older macOS-only preview manifests
+remain supported and are skipped by Linux jobs.
+
 Desktop prepares a tested candidate before its protected publication approval.
 Publication creates a GitHub prerelease, then the restricted Homebrew GitHub App
 opens a two-file update PR and enables auto-merge. The existing Tap checks and
-three Native installation checks remain required. The macOS job also qualifies
+three Native installation checks remain required. Every supported platform also qualifies
 preview install/reinstall/uninstall and real data retention. First-release
 upgrade coverage is explicitly not run until a prior preview exists.
 
@@ -119,8 +128,7 @@ or a downgrade, and safely reuse a matching branch/PR. A strict-check failure
 leaves the PR unmerged and its receipts available in Actions.
 
 Stable Tauri cutover is a later approved operation: preserve the canonical app
-identity, qualify the Deno-to-Tauri upgrade and data compatibility, make stable
-macOS-only, and retire the old desktop CI without deleting old downloads.
+identity, qualify the Deno-to-Tauri upgrade and data compatibility, retain the qualified Linux platforms, and retire the old desktop CI without deleting old downloads.
 
 After a preview update merges, main CI also installs the actual public
 `lapismd/tap/lapis-notes@preview` cask. Its `preview-public` receipts verify the
