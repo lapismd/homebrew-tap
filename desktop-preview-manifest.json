@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 2,
+  "runtime": "tauri",
+  "channel": "preview",
+  "repository": "lapismd/lapis-desktop",
+  "version": "2026.31.6-rc.1",
+  "tag": "desktop-v2026.31.6-rc.1",
+  "sourceCommit": "217aa6e396a9ef05040e7decad614e73b0b49662",
+  "artifacts": [
+    {
+      "target": "aarch64-apple-darwin",
+      "platform": "macos",
+      "architecture": "arm64",
+      "file": "Lapis-Notes-Preview-2026.31.6-rc.1-macos-arm64.zip",
+      "url": "https://github.com/lapismd/lapis-desktop/releases/download/desktop-v2026.31.6-rc.1/Lapis-Notes-Preview-2026.31.6-rc.1-macos-arm64.zip",
+      "size": 90382268,
+      "sha256": "094156f0478986ce2f882340d75369dab8c9e276f348521a86b10ebfb01595ac"
+    },
+    {
+      "target": "aarch64-unknown-linux-gnu",
+      "platform": "linux",
+      "architecture": "arm64",
+      "file": "Lapis-Notes-Preview-2026.31.6-rc.1-linux-arm64.tar.gz",
+      "url": "https://github.com/lapismd/lapis-desktop/releases/download/desktop-v2026.31.6-rc.1/Lapis-Notes-Preview-2026.31.6-rc.1-linux-arm64.tar.gz",
+      "size": 102743064,
+      "sha256": "6c5927fc751ca4fccdedaade59919904125b3cb29ed85c95231c1158155d5d1d"
+    },
+    {
+      "target": "x86_64-unknown-linux-gnu",
+      "platform": "linux",
+      "architecture": "x64",
+      "file": "Lapis-Notes-Preview-2026.31.6-rc.1-linux-x64.tar.gz",
+      "url": "https://github.com/lapismd/lapis-desktop/releases/download/desktop-v2026.31.6-rc.1/Lapis-Notes-Preview-2026.31.6-rc.1-linux-x64.tar.gz",
+      "size": 102410887,
+      "sha256": "d98209f80823b2ee070955fff7a23666f0a66188cb7c0eabf30a750bde54fd0e"
+    }
+  ]
+}
