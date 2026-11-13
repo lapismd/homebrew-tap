@@ -17,6 +17,7 @@ import { join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { renderCask } from "./cask.mjs";
 import { assertProgression, validateChannel } from "./channels.mjs";
+import { acquireTap } from "./tap-ownership.mjs";
 import {
   nativePreviewTarget,
   installationPaths,
@@ -148,11 +149,12 @@ try {
   await writeFile(join(vault, "Welcome.md"), "# Retained vault\n");
   const archive = await download(manifest, values.archive);
   if (values.public) {
-    run("brew", ["tap", "lapismd/tap"]);
-    ownsPublicTap = true;
     const official = execFileSync("brew", ["--repository", "lapismd/tap"], {
       encoding: "utf8",
     }).trim();
+    ownsPublicTap = await acquireTap(official, () =>
+      run("brew", ["tap", "lapismd/tap"]),
+    );
     assert.equal(
       await readFile(join(official, "Casks/lapis-notes@preview.rb"), "utf8"),
       renderCask(manifest),
