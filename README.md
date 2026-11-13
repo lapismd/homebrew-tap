@@ -82,14 +82,19 @@ on its PATH. Evidence is retained as workflow artifacts.
 
 The tap also supports the separate Tauri Desktop release pipeline. Preview is
 Apple Silicon macOS 15+ and Ubuntu 24.04 Linux ARM64/x64; stable Notes remains
-available above. A preview cask is generated only after the first verified public
-Desktop prerelease. Until then these commands are not yet installable:
+available above. The verified [2026.31.6-rc.1 preview](https://github.com/lapismd/lapis-desktop/releases/tag/desktop-v2026.31.6-rc.1)
+is available now. Install it with Homebrew 7:
 
 ```sh
+brew tap lapismd/tap
 brew trust --cask lapismd/tap/lapis-notes@preview
 brew install --cask lapismd/tap/lapis-notes@preview
 brew upgrade --cask lapismd/tap/lapis-notes@preview
+brew uninstall --cask lapismd/tap/lapis-notes@preview
 ```
+
+On macOS, open **Lapis Notes Preview** from Applications. On Linux, run
+`lapis-notes-preview` after installing the Ubuntu libraries listed above.
 
 Preview installs **Lapis Notes Preview.app**, uses its separate profile, and does
 not register the stable app's URL handlers. It is ad-hoc signed and unnotarized;

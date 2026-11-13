@@ -88,3 +88,5 @@ platform, and retire Deno desktop CI while retaining historical archives.
     the official cask bytes to match the verified manifest. It repeats ordinary
     launch, reinstall, uninstall and data-retention checks on the ephemeral
     runner, recording public-cask receipts separately from candidate receipts.
+    Public acceptance untaps only a tap it created; an existing setup-homebrew
+    tap or symlink remains available for the setup action's post-job cleanup.
