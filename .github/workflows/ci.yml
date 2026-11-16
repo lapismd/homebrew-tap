@@ -82,6 +82,8 @@ jobs:
       - name: Verify published preview
         id: preview
         run: node scripts/preview-info.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/checkout@v7
         if: steps.preview.outputs.available == 'true'
         with:

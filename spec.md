@@ -90,3 +90,9 @@ platform, and retire Deno desktop CI while retaining historical archives.
     runner, recording public-cask receipts separately from candidate receipts.
     Public acceptance untaps only a tap it created; an existing setup-homebrew
     tap or symlink remains available for the setup action's post-job cleanup.
+
+15. Release metadata verification may use the workflow's read-only GitHub token
+    only for canonical `api.github.com` release/tag requests. Authenticated API
+    requests refuse redirects. Manifest/archive downloads stay public and carry
+    no token. Authentication never relaxes channel, source, size or hash checks;
+    an API failure remains fatal without retry or anonymous fallback.

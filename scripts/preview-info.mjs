@@ -13,6 +13,7 @@ const platform = process.platform === "darwin" ? "macos" : process.platform;
 if (manifest) {
   const verified = await readPublishedManifest(manifest.tag, fetch, {
     channel: "preview",
+    token: process.env.GH_TOKEN ?? process.env.GITHUB_TOKEN,
   });
   if (!isDeepStrictEqual(verified, manifest))
     throw Error("Preview state differs from the published release");
