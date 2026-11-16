@@ -14,16 +14,29 @@ import { renderCask, validateManifest } from "./cask.mjs";
 export async function readPublishedManifest(
   tag,
   fetcher = fetch,
-  { channel = "stable" } = {},
+  { channel = "stable", token } = {},
 ) {
   const { repository } = channelPaths(channel);
+  const apiFetch = (url) =>
+    fetcher(
+      url,
+      token
+        ? {
+            headers: {
+              Accept: "application/vnd.github+json",
+              Authorization: `Bearer ${token}`,
+            },
+            redirect: "error",
+          }
+        : undefined,
+    );
   const pattern =
     channel === "preview"
       ? /^desktop-v20\d{2}\.\d+\.\d+-rc\.[1-9]\d*$/
       : /^desktop-v\d+\.\d+\.\d+$/;
   if (!pattern.test(tag))
     throw new Error("An exact desktop-v<version> release is required");
-  const releaseResponse = await fetcher(
+  const releaseResponse = await apiFetch(
     `https://api.github.com/repos/${repository}/releases/tags/${tag}`,
   );
   if (!releaseResponse.ok)
@@ -55,13 +68,13 @@ export async function readPublishedManifest(
   const manifest = validateChannel(await response.json(), channel);
   if (manifest.tag !== tag)
     throw new Error("Desktop manifest tag disagrees with requested release");
-  let ref = await fetcher(
+  let ref = await apiFetch(
     `https://api.github.com/repos/${repository}/git/ref/tags/${tag}`,
   );
   if (!ref.ok) throw new Error("Unable to resolve desktop release tag");
   let object = (await ref.json()).object;
   for (let depth = 0; object.type === "tag" && depth < 5; depth++) {
-    ref = await fetcher(
+    ref = await apiFetch(
       `https://api.github.com/repos/${repository}/git/tags/${object.sha}`,
     );
     if (!ref.ok) throw new Error("Unable to resolve annotated desktop tag");
@@ -109,6 +122,7 @@ async function main() {
   const paths = channelPaths(values.channel);
   const manifest = await readPublishedManifest(values.release, fetch, {
     channel: values.channel,
+    token: process.env.GH_TOKEN ?? process.env.GITHUB_TOKEN,
   });
   let previous;
   try {
