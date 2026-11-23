@@ -11,7 +11,7 @@ async function optional(file) {
     if (error.code !== "ENOENT") throw error;
   }
 }
-for (const channel of ["stable", "preview"]) {
+for (const channel of ["stable", "preview", "cli"]) {
   const { manifest } = channelPaths(channel);
   const previous = await optional(join(values.base, manifest));
   const next = await optional(manifest);

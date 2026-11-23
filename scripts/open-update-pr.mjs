@@ -3,8 +3,8 @@ import { readFile } from "node:fs/promises";
 import { isDeepStrictEqual, parseArgs } from "node:util";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
-import { renderCask } from "./cask.mjs";
 import {
+  renderChannel,
   assertProgression,
   channelPaths,
   validateChannel,
@@ -42,7 +42,7 @@ export async function openUpdatePR(manifest, { channel = "stable", request }) {
   validateChannel(manifest, channel);
   const paths = channelPaths(channel);
   const files = {
-    [paths.cask]: renderCask(manifest),
+    [paths.cask]: renderChannel(manifest, channel),
     [paths.manifest]: `${JSON.stringify(manifest, null, 2)}\n`,
   };
   const base = (await request("/git/ref/heads/main")).object.sha;
@@ -117,7 +117,7 @@ export async function openUpdatePR(manifest, { channel = "stable", request }) {
         title: `Update ${paths.token} to ${manifest.version}`,
         head: branch,
         base: "main",
-        body: `Install the verified ${channel} release from https://github.com/${manifest.repository}/releases/tag/${manifest.tag}.\n\nSource: ${manifest.sourceCommit}\n\nAll four required tap checks gate this update. Preview limitations are recorded in the upstream release notes.`,
+        body: `Install the verified ${channel} release from https://github.com/${paths.repository}/releases/tag/${channel === "cli" ? `v${manifest.version}` : manifest.tag}.\n\nSource: ${manifest.sourceCommit}\n\nAll four required tap checks gate this update. Preview limitations are recorded in the upstream release notes.`,
       },
     }));
   if (pull.base?.ref && pull.base.ref !== "main")
@@ -127,7 +127,7 @@ export async function openUpdatePR(manifest, { channel = "stable", request }) {
       method: "PUT",
       body: { expected_head_sha: head.object.sha },
     });
-  if (channel === "preview")
+  if (channel === "preview" || channel === "cli")
     await request("/graphql", {
       method: "POST",
       body: {
@@ -147,12 +147,17 @@ async function main() {
     JSON.parse(await readFile(paths.manifest, "utf8")),
     values.channel,
   );
-  const verified = await readPublishedManifest(manifest.tag, fetch, {
-    channel: values.channel,
-  });
+  const verified = await readPublishedManifest(
+    values.channel === "cli" ? `v${manifest.version}` : manifest.tag,
+    fetch,
+    {
+      channel: values.channel,
+    },
+  );
   if (
     !isDeepStrictEqual(verified, manifest) ||
-    (await readFile(paths.cask, "utf8")) !== renderCask(manifest)
+    (await readFile(paths.cask, "utf8")) !==
+      renderChannel(manifest, values.channel)
   )
     throw Error("Local update differs from the verified published release");
   console.log(

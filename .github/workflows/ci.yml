@@ -105,6 +105,11 @@ jobs:
       - name: Public Tauri preview Homebrew installation on Linux
         if: runner.os == 'Linux' && github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.preview.outputs.available == 'true'
         run: xvfb-run -a dbus-run-session -- node scripts/test-preview-install.mjs --public --manifest desktop-preview-manifest.json --source .candidates/preview-source --output test-results/preview-public
+      - name: Native standalone CLI installation
+        if: hashFiles('cli-manifest.json') != ''
+        run: node scripts/test-cli-install.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/upload-artifact@v7
         if: always() && steps.release.outputs.available == 'true'
         with:

@@ -139,3 +139,18 @@ After a preview update merges, main CI also installs the actual public
 `lapismd/tap/lapis-notes@preview` cask. Its `preview-public` receipts verify the
 user-facing install/reinstall/uninstall and ordinary-app launch independently
 from the PR's temporary candidate cask.
+
+## Standalone Lapis CLI
+
+The independent `lapis` formula is generated from verified Server CLI releases.
+It supports Apple Silicon macOS and Linux ARM64/x64 without installing Desktop.
+Release admission resolves the source tag and checks all three published archives;
+a generated update PR must pass the native installation matrix before merge.
+The updater is `node scripts/update-cask.mjs --channel cli --release v<VERSION>`,
+followed by `node scripts/open-update-pr.mjs --channel cli` with the restricted
+release App. Formula availability is gated by that first verified update PR.
+
+Once published, install with `brew install lapismd/tap/lapis`. Homebrew owns this
+command; Desktop's installer refuses to overwrite it. Approve scoped local
+access in Desktop to use `lapis vault list` or `lapis mcp serve --stdio` without
+a separate sign-in. Remote targets retain explicit credentials.

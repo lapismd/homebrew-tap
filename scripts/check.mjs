@@ -10,6 +10,8 @@ import { spawnSync } from "node:child_process";
 import os from "node:os";
 import path from "node:path";
 import { renderCask } from "./cask.mjs";
+import { cliFixture } from "../tests/cli-fixture.mjs";
+import { renderFormula } from "./cli.mjs";
 import { channelPaths } from "./channels.mjs";
 import {
   previewFixture,
@@ -31,6 +33,11 @@ run("/bin/sh", ["-n", "scripts/prepare-macos.sh"]);
 const root = await mkdtemp(path.join(os.tmpdir(), "lapis-cask-check-"));
 try {
   await mkdir(path.join(root, "Casks"));
+  await mkdir(path.join(root, "Formula"));
+  const formula = path.join(root, "Formula/lapis.rb");
+  await writeFile(formula, renderFormula(cliFixture()));
+  run("ruby", ["-c", formula]);
+  if (process.env.LAPIS_TAP_BREW_CHECK === "1") run("brew", ["style", formula]);
   for (const manifest of [fixture(), previewFixture(), linuxPreviewFixture()]) {
     const file =
       manifest.schemaVersion === 2
@@ -65,3 +72,26 @@ for (const channel of ["stable", "preview"]) {
 }
 if (JSON.stringify(casks.sort()) !== JSON.stringify(expected.sort()))
   throw Error("Unexpected cask or missing release manifest");
+
+const formulaFiles = await readdir("Formula").catch((e) => {
+  if (e.code === "ENOENT") return [];
+  throw e;
+});
+let cli;
+try {
+  cli = JSON.parse(await readFile("cli-manifest.json", "utf8"));
+} catch (e) {
+  if (e.code !== "ENOENT") throw e;
+}
+if (
+  JSON.stringify(formulaFiles.sort()) !==
+  JSON.stringify(cli ? ["lapis.rb"] : [])
+)
+  throw Error("Unexpected formula or missing CLI manifest");
+if (cli) {
+  if ((await readFile("Formula/lapis.rb", "utf8")) !== renderFormula(cli))
+    throw Error("CLI formula differs from verified manifest");
+  run("ruby", ["-c", "Formula/lapis.rb"]);
+  if (process.env.LAPIS_TAP_BREW_CHECK === "1")
+    run("brew", ["style", "Formula/lapis.rb"]);
+}
