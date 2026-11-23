@@ -103,7 +103,8 @@ platform, and retire Deno desktop CI while retaining historical archives.
     `cli-manifest.json`. It requires macOS ARM64 and Linux ARM64/x64 archives,
     one immutable release source, canonical GitHub URLs, sizes and SHA-256.
     Verification resolves the tag to that source and hashes every downloaded
-    archive before producing `Formula/lapis.rb` and the independent CLI manifest.
+    archive, verifies the exact source Cargo version agrees with the release,
+    before producing `Formula/lapis.rb` and the independent CLI manifest.
 16. CLI updates reuse the restricted App-authored PR path with CLI-only file
     admission, monotonic versions and refusal of changed same-version contents.
     Existing desktop casks and manifests remain separately verified.

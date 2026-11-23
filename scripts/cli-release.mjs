@@ -57,6 +57,20 @@ export async function readPublishedCliManifest(
     object = (await api(`/git/tags/${object.sha}`)).object;
   if (object.type !== "commit" || object.sha !== m.sourceCommit)
     throw Error("CLI source does not match its release tag");
+  const cargo = await api(
+    `/contents/crates/lapis-cli/Cargo.toml?ref=${m.sourceCommit}`,
+  );
+  if (
+    cargo.type !== "file" ||
+    cargo.encoding !== "base64" ||
+    typeof cargo.content !== "string"
+  )
+    throw Error("CLI version source unavailable");
+  const text = Buffer.from(cargo.content, "base64").toString("utf8");
+  const binaryVersion =
+    /\[package\]\s+name = "lapis-cli"\s+version = "([^"]+)"/.exec(text)?.[1];
+  if (binaryVersion !== m.version)
+    throw Error("CLI binary/source release version mismatch");
   for (const a of m.archives) {
     const matches = assets(a.file);
     if (

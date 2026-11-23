@@ -22,3 +22,10 @@ this infrastructure commit contains no invented release hashes or formula.
 Desktop's existing restricted tap App will reconcile the published CLI release
 using this channel. A corrected Server release must report the same executable
 and archive version; published older assets are never replaced.
+
+A follow-up exact legacy-version regression failed once before source-version
+admission. The verifier now reads the exact tag's CLI Cargo identity and refuses
+archives whose release version disagrees with that executable source version.
+This keeps existing v2.9.1 archives out of the formula channel while the corrected
+patch release is pending. The same exact target and complete Node/Ruby checks
+then pass. Prototype-inherited archive target names are refused as well.

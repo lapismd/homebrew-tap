@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readPublishedCliManifest } from "../scripts/cli-release.mjs";
 import { cliFixture } from "./cli-fixture.mjs";
-function fixture(mutate = () => {}) {
+function fixture(mutate = () => {}, binaryVersion = "2.9.2") {
   const m = cliFixture(),
     bytes = Buffer.from("archive fixture");
   for (const a of m.archives) {
@@ -28,6 +28,14 @@ function fixture(mutate = () => {}) {
   const fetcher = async (url, options) => {
     if (url.includes("api.github.com")) {
       assert.equal(options.redirect, "error");
+      if (url.includes("/contents/"))
+        return Response.json({
+          type: "file",
+          encoding: "base64",
+          content: Buffer.from(
+            `[package]\nname = "lapis-cli"\nversion = "${binaryVersion}"\n`,
+          ).toString("base64"),
+        });
       return Response.json(url.includes("/releases/") ? release : ref);
     }
     assert.equal(
@@ -59,4 +67,12 @@ test("published CLI verification refuses changed tag authority, missing assets a
     const f = fixture(mutate);
     await assert.rejects(readPublishedCliManifest("v2.9.2", f.fetcher));
   }
+});
+
+test("CLI formula admission rejects the legacy archive/binary version mismatch", async () => {
+  const f = fixture(() => {}, "0.1.0");
+  await assert.rejects(
+    readPublishedCliManifest("v2.9.2", f.fetcher),
+    /version/,
+  );
 });
