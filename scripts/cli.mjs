@@ -18,6 +18,7 @@ export function validateCliManifest(m) {
   for (const a of m.archives) {
     const label = cliTargets[a.target];
     if (
+      !Object.hasOwn(cliTargets, a.target) ||
       !label ||
       seen.has(a.target) ||
       a.version !== m.version ||

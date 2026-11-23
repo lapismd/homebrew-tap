@@ -14,6 +14,7 @@ test("formula derives all three qualified targets from immutable upstream coordi
 test("CLI manifests reject foreign sources, redirects, missing targets and altered coordinates", () => {
   for (const mutate of [
     (m) => m.archives.pop(),
+    (m) => (m.archives[0].target = "__proto__"),
     (m) => m.archives.push(m.archives[0]),
     (m) => (m.archives[0].url = "https://evil.example/cli"),
     (m) => (m.archives[0].sourceCommit = "c".repeat(40)),
