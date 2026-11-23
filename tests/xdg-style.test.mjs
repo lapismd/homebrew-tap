@@ -10,5 +10,7 @@ test("Linux desktop entry paths retain XDG precedence without multiline Ruby int
     assert.match(ruby, /xdg_data_home = ENV.fetch\("HOMEBREW_XDG_DATA_HOME"\)/);
     assert.match(ruby, /ENV.fetch\("XDG_DATA_HOME", File.join\(Dir.home/);
     assert.match(ruby, /#\{xdg_data_home\}\/applications\//);
+    assert.match(ruby, /\n\n    xdg_data_home =/);
+    assert.match(ruby, /xdg_data_home = [\s\S]*?    end\n\n    binary/);
   }
 });

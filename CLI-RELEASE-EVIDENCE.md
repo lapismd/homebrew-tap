@@ -38,3 +38,11 @@ verified manifests. The exact regression passes; the full suite passes 31 cases
 with the existing opt-in native case skipped, and local Ruby checks pass.
 Hosted Homebrew style and all three native desktop/CLI installation lanes remain
 the merge gate; no assertion, threshold, manifest or archive checksum is changed.
+
+The next hosted style run found two preview-only stanza spacing errors after
+the interpolation repair. The focused XDG test reproduced one failing case;
+the preview generator now separates the URL and local assignment once and
+uses a single blank before binary declarations. The exact test and all 31 Node
+cases pass (one opt-in skip); regenerated casks pass local Ruby checks. A first
+regeneration command used a nonexistent manifest filename and changed no files;
+using the channel's tracked manifest repaired the resulting output mismatch.
