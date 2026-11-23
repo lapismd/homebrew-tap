@@ -29,3 +29,12 @@ archives whose release version disagrees with that executable source version.
 This keeps existing v2.9.1 archives out of the formula channel while the corrected
 patch release is pending. The same exact target and complete Node/Ruby checks
 then pass. Prototype-inherited archive target names are refused as well.
+
+The first hosted tap check found two new Homebrew style offenses in the unchanged
+Linux desktop-entry interpolation. The exact local XDG regression failed once
+before the fix. Both owning generators now compute the same precedence-preserving
+path outside interpolation and regenerate their production casks from unchanged
+verified manifests. The exact regression passes; the full suite passes 31 cases
+with the existing opt-in native case skipped, and local Ruby checks pass.
+Hosted Homebrew style and all three native desktop/CLI installation lanes remain
+the merge gate; no assertion, threshold, manifest or archive checksum is changed.

@@ -135,11 +135,13 @@ export function renderCask(manifest, { candidateArchive } = {}) {
   if (manifest.artifacts.some((item) => item.platform === "linux")) {
     lines.push(
       ...platformHeaders.get("linux"),
+      '    xdg_data_home = ENV.fetch("HOMEBREW_XDG_DATA_HOME") do',
+      '      ENV.fetch("XDG_DATA_HOME", File.join(Dir.home, ".local/share"))',
+      "    end",
+      "",
       '    binary "Lapis-Notes-#{version}-linux-#{arch}/lapis-notes", target: "lapis-notes"',
       '    artifact "Lapis-Notes-#{version}-linux-#{arch}/lapis-notes.desktop",',
-      '             target: "#{ENV.fetch("HOMEBREW_XDG_DATA_HOME",',
-      '                                  ENV.fetch("XDG_DATA_HOME",',
-      '                                            "#{Dir.home}/.local/share"))}/applications/lapis-notes.desktop"',
+      '             target: "#{xdg_data_home}/applications/lapis-notes.desktop"',
       "",
       "    preflight_steps do",
       '      inreplace "Lapis-Notes-{{version}}-linux-{{arch}}/lapis-notes.desktop",',
