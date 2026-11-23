@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { openUpdatePR } from "../scripts/open-update-pr.mjs";
+import { cliFixture } from "./cli-fixture.mjs";
+import { renderFormula } from "../scripts/cli.mjs";
 import { renderCask } from "../scripts/cask.mjs";
 import { previewFixture } from "./preview-fixture.mjs";
 const m = previewFixture();
@@ -10,11 +12,21 @@ const files = {
 };
 function server({
   current,
+  cli = false,
   failOnce = false,
   unrelated = false,
   wrongContents = false,
   behind = false,
 } = {}) {
+  const files = cli
+    ? {
+        "Formula/lapis.rb": renderFormula(cliFixture()),
+        "cli-manifest.json": JSON.stringify(cliFixture(), null, 2) + "\n",
+      }
+    : {
+        "Casks/lapis-notes@preview.rb": renderCask(m),
+        "desktop-preview-manifest.json": JSON.stringify(m, null, 2) + "\n",
+      };
   const state = { branch: false, pull: null, calls: [] };
   state.request = async (endpoint, options = {}) => {
     const method = options.method ?? "GET";
@@ -27,7 +39,9 @@ function server({
           ? current &&
             (file.endsWith(".json")
               ? JSON.stringify(current)
-              : renderCask(current))
+              : cli
+                ? renderFormula(current)
+                : renderCask(current))
           : files[file];
       return text
         ? {
@@ -132,5 +146,35 @@ test("behind update branches request a checked head update before auto-merge", a
     s.calls.some(
       ([method, path]) => method === "PUT" && path === "/pulls/7/update-branch",
     ),
+  );
+});
+
+test("CLI updates remain restricted to formula/manifest and enable guarded auto-merge", async () => {
+  const s = server({ cli: true });
+  assert.equal(
+    (await openUpdatePR(cliFixture(), { channel: "cli", request: s.request }))
+      .status,
+    "created",
+  );
+  assert.equal(
+    (await openUpdatePR(cliFixture(), { channel: "cli", request: s.request }))
+      .status,
+    "reused",
+  );
+  assert.equal(
+    s.calls.filter(
+      ([method, path]) => method === "POST" && path === "/git/refs",
+    ).length,
+    1,
+  );
+  assert.ok(
+    s.calls.some(([method, path]) => method === "POST" && path === "/graphql"),
+  );
+  await assert.rejects(
+    openUpdatePR(cliFixture(), {
+      channel: "cli",
+      request: server({ cli: true, unrelated: true }).request,
+    }),
+    /unrelated/,
   );
 });

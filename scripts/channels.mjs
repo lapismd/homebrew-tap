@@ -1,4 +1,6 @@
 import { isDeepStrictEqual } from "node:util";
+import { validateCliManifest, renderFormula } from "./cli.mjs";
+import { renderCask } from "./cask.mjs";
 import { validateManifest } from "./cask.mjs";
 
 export function channelPaths(channel = "stable") {
@@ -16,9 +18,17 @@ export function channelPaths(channel = "stable") {
       repository: "lapismd/lapis-desktop",
       token: "lapis-notes@preview",
     };
-  throw Error("Choose stable or preview channel");
+  if (channel === "cli")
+    return {
+      manifest: "cli-manifest.json",
+      cask: "Formula/lapis.rb",
+      repository: "lapismd/lapis-server",
+      token: "lapis",
+    };
+  throw Error("Choose stable, preview or cli channel");
 }
 export function validateChannel(manifest, channel) {
+  if (channel === "cli") return validateCliManifest(manifest);
   validateManifest(manifest);
   if (
     manifest.repository !== channelPaths(channel).repository ||
@@ -60,4 +70,8 @@ export function assertProgression(previous, next, channel) {
     throw Error(
       "Published version identity changed; refusing to replace cask hashes",
     );
+}
+
+export function renderChannel(manifest, channel) {
+  return channel === "cli" ? renderFormula(manifest) : renderCask(manifest);
 }

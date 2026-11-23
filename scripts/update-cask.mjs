@@ -1,10 +1,12 @@
 #!/usr/bin/env node
+import { readPublishedCliManifest } from "./cli-release.mjs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { parseArgs } from "node:util";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import {
+  renderChannel,
   channelPaths,
   validateChannel,
   assertProgression,
@@ -16,6 +18,8 @@ export async function readPublishedManifest(
   fetcher = fetch,
   { channel = "stable", token } = {},
 ) {
+  if (channel === "cli")
+    return readPublishedCliManifest(tag, fetcher, { token });
   const { repository } = channelPaths(channel);
   const apiFetch = (url) =>
     fetcher(
@@ -131,8 +135,8 @@ async function main() {
     if (error.code !== "ENOENT") throw error;
   }
   assertProgression(previous, manifest, values.channel);
-  await mkdir("Casks", { recursive: true });
-  await writeFile(paths.cask, renderCask(manifest));
+  await mkdir(path.dirname(paths.cask), { recursive: true });
+  await writeFile(paths.cask, renderChannel(manifest, values.channel));
   await writeFile(paths.manifest, `${JSON.stringify(manifest, null, 2)}\n`);
   console.log(
     `Generated Lapis Notes ${manifest.version} from ${manifest.sourceCommit}`,

@@ -42,12 +42,13 @@ cask "lapis-notes@preview" do
   on_linux do
     url "https://github.com/lapismd/lapis-desktop/releases/download/desktop-v#{version}/Lapis-Notes-Preview-#{version}-linux-#{arch}.tar.gz"
 
+    xdg_data_home = ENV.fetch("HOMEBREW_XDG_DATA_HOME") do
+      ENV.fetch("XDG_DATA_HOME", File.join(Dir.home, ".local/share"))
+    end
+
     binary "lapis-notes-preview/bin/lapis-notes-preview", target: "lapis-notes-preview"
     artifact ".homebrew-helpers/preview.desktop",
-             target: "#{ENV.fetch("HOMEBREW_XDG_DATA_HOME",
-                                  ENV.fetch("XDG_DATA_HOME",
-                                            "#{Dir.home}/.local/share"))}" \
-                     "/applications/com.lapismd.lapis-desktop.preview.desktop"
+             target: "#{xdg_data_home}/applications/com.lapismd.lapis-desktop.preview.desktop"
 
     preflight_steps do
       run "/bin/mkdir", args: ["-p", "{{staged_path}}/.homebrew-helpers"]

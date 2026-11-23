@@ -96,3 +96,19 @@ platform, and retire Deno desktop CI while retaining historical archives.
     requests refuse redirects. Manifest/archive downloads stay public and carry
     no token. Authentication never relaxes channel, source, size or hash checks;
     an API failure remains fatal without retry or anonymous fallback.
+
+## Standalone CLI formula
+
+15. The `lapis` formula consumes only the Server's published stable
+    `cli-manifest.json`. It requires macOS ARM64 and Linux ARM64/x64 archives,
+    one immutable release source, canonical GitHub URLs, sizes and SHA-256.
+    Verification resolves the tag to that source and hashes every downloaded
+    archive, verifies the exact source Cargo version agrees with the release,
+    before producing `Formula/lapis.rb` and the independent CLI manifest.
+16. CLI updates reuse the restricted App-authored PR path with CLI-only file
+    admission, monotonic versions and refusal of changed same-version contents.
+    Existing desktop casks and manifests remain separately verified.
+17. Each native job installs, executes help/version and `brew test`, reinstalls
+    and uninstalls the real formula under a temporary tap on an ephemeral runner.
+    No Desktop installation or credentials are needed. The binary version must
+    match its release. An Intel macOS build is not advertised.
