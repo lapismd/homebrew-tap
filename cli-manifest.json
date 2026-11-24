@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "version": "2.9.2",
+  "sourceCommit": "4c22844f67744a47f38d580a684cca90c4731605",
+  "archives": [
+    {
+      "version": "2.9.2",
+      "sourceCommit": "4c22844f67744a47f38d580a684cca90c4731605",
+      "target": "aarch64-apple-darwin",
+      "file": "lapis-v2.9.2-macos-arm64.tar.gz",
+      "sha256": "35b2c7a9bdcacb757d176541a213f6edc6a1500e5eb1addacfda105696971f2d",
+      "size": 5587342,
+      "label": "Lapis CLI 2.9.2 · macos-arm64",
+      "url": "https://github.com/lapismd/lapis-server/releases/download/v2.9.2/lapis-v2.9.2-macos-arm64.tar.gz"
+    },
+    {
+      "version": "2.9.2",
+      "sourceCommit": "4c22844f67744a47f38d580a684cca90c4731605",
+      "target": "aarch64-unknown-linux-gnu",
+      "file": "lapis-v2.9.2-linux-arm64.tar.gz",
+      "sha256": "cf02d929e4470657918607d9b1e2fad7345949e8b2b18cd98fa567d829866495",
+      "size": 6246249,
+      "label": "Lapis CLI 2.9.2 · linux-arm64",
+      "url": "https://github.com/lapismd/lapis-server/releases/download/v2.9.2/lapis-v2.9.2-linux-arm64.tar.gz"
+    },
+    {
+      "version": "2.9.2",
+      "sourceCommit": "4c22844f67744a47f38d580a684cca90c4731605",
+      "target": "x86_64-unknown-linux-gnu",
+      "file": "lapis-v2.9.2-linux-x64.tar.gz",
+      "sha256": "9d106527cf209662d5d9c444812a0a6ce49ea597c0daed17d0753b868869f126",
+      "size": 6393314,
+      "label": "Lapis CLI 2.9.2 · linux-x64",
+      "url": "https://github.com/lapismd/lapis-server/releases/download/v2.9.2/lapis-v2.9.2-linux-x64.tar.gz"
+    }
+  ]
+}
