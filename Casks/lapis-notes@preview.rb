@@ -3,10 +3,10 @@
 cask "lapis-notes@preview" do
   arch arm: "arm64", intel: "x64"
 
-  version "2026.31.6-rc.4"
-  sha256 arm:          "2026a2d32de1199e0982765c8b2dcf34cf4c5e9a32a3030293a33a68ace4b831",
-         arm64_linux:  "c6313c6615312dc4fccae1eb1ef995e43c5821c4c86c7d16308b1a646b86e32f",
-         x86_64_linux: "e60f60b6ab51fbe9bfe5dd8611913addd55f0a61272f77995d5eb59c01a03102"
+  version "2026.31.6-rc.5"
+  sha256 arm:          "63dd4e77025e38fd3d1a284625011c4d4bf1a33fc094202e7f39cc95ef804eb2",
+         arm64_linux:  "e4451d9dedb62c6c2e09c97ce99c2ee20a96822c0143ac425c50e63d99244924",
+         x86_64_linux: "18d48100b98f5c50791859ba5f1ff612614ebc85b90158c087520d1ab40b78d2"
 
   on_macos do
     url "https://github.com/lapismd/lapis-desktop/releases/download/desktop-v#{version}/Lapis-Notes-Preview-#{version}-macos-arm64.zip"
